@@ -13,41 +13,14 @@ export default async function handler(req: Request) {
   const siteName = payload?.name || 'Unknown Project';
   const timestamp = new Date().toLocaleString('bg-BG');
 
-  if (eventType === 'deployment.error' || payload?.state === 'ERROR') {
-    const errorMessage = {
-      username: 'Vercel Build Bot',
-      avatar_url: 'https://i.imgur.com/yW2W9SC.png',
-      embeds: [
-        {
-          title: '❌ Билдът е неуспешен!',
-          description: `Проектът **${siteName}** не успя да се билдне.`,
-          color: 0xff4d4f,
-          fields: [
-            { name: 'Дата', value: timestamp, inline: true },
-            { name: 'Статус', value: '❌ ERROR', inline: true }
-          ],
-          footer: { text: 'Vercel → Discord' }
-        }
-      ]
-    };
-
-    await fetch(webhook!, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(errorMessage),
-    });
-
-    return new Response('❌ Error embed sent');
-  }
-
   if (eventType === 'deployment.succeeded' || payload?.state === 'READY') {
-    const successMessage = {
-      username: 'Vercel Build Bot',
+    const message = {
+      username: 'RSS Build Bot',
       avatar_url: 'https://i.imgur.com/M8JHkXe.png',
       embeds: [
         {
           title: '✅ Успешен билд!',
-          description: `Проектът **${siteName}** е успешно деплойнат!`,
+          description: `Проектът **${siteName}** е успешно деплойнат.`,
           color: 0x57f287,
           fields: [
             { name: 'Дата', value: timestamp, inline: true },
@@ -74,11 +47,11 @@ export default async function handler(req: Request) {
     await fetch(webhook!, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(successMessage),
+      body: JSON.stringify(message),
     });
 
-    return new Response('✅ Success embed sent');
+    return new Response('✅ Sent to Discord');
   }
 
-  return new Response('Ignored event', { status: 200 });
+  return new Response('Not a successful deployment', { status: 200 });
 }
