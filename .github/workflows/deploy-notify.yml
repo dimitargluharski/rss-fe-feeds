@@ -1,0 +1,15 @@
+name: Notify Discord on Push
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Discord
+        run: |
+          curl -X POST ${{ secrets.DISCORD_WEBHOOK }} \
+          -H "Content-Type: application/json" \
+          -d "{\"content\":\"📦 Кодът беше качен в GitHub! Vercel ще стартира билд. 🚀\"}"
