@@ -37,6 +37,7 @@ type Feeds = {
 const App = () => {
   const [feeds, setFeeds] = useState<Feeds>({});
   const [loading, setLoading] = useState(true);
+  const [bookmarks, setBookmarks] = useState<FeedItem[]>([]);
 
   useEffect(() => {
     const fetchFeeds = async () => {
@@ -66,15 +67,34 @@ const App = () => {
     };
 
     fetchFeeds();
+    const savedBookmarks = localStorage.getItem('bookmarks');
+    if (savedBookmarks) {
+      setBookmarks(JSON.parse(savedBookmarks));
+    }
   }, []);
 
+  const toggleBookmark = (item: FeedItem) => {
+    const isBookmarked = bookmarks.some(bookmark => bookmark.link === item.link);
+
+    let updatedBookmarks;
+    if (isBookmarked) {
+      updatedBookmarks = bookmarks.filter(bookmark => bookmark.link !== item.link);
+    } else {
+      updatedBookmarks = [...bookmarks, item];
+    }
+
+    setBookmarks(updatedBookmarks);
+    localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
+  };
+
+  const isBookmarked = (link: string) => {
+    return bookmarks.some(bookmark => bookmark.link === link);
+  };
 
   if (loading) {
     return (
-      <div className='text-center text-gray-600'>
-        Loading feeds...
-      </div>
-    )
+      <div className="text-center text-gray-600">Loading feeds...</div>
+    );
   }
 
   return (
@@ -85,30 +105,71 @@ const App = () => {
         </h1>
       </header>
 
+      {bookmarks.length > 0 && (
+        <div className="max-w-4xl mx-auto mb-12 bg-white border border-yellow-300 shadow-lg rounded-xl p-6">
+          <h2 className="text-xl font-bold text-yellow-600 mb-4 ">⭐️ Bookmarked Articles</h2>
+          <ul className="space-y-3">
+            {bookmarks.map((item) => (
+              <li key={item.link} className="flex justify-between items-start">
+                <div>
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-700 hover:text-indigo-600 transition duration-200"
+                  >
+                    {item.title}
+                  </a>
+                  <p className="text-xs text-gray-400">
+                    {new Date(item.pubDate).toLocaleDateString()}
+                  </p>
+                </div>
+                <button
+                  onClick={() => toggleBookmark(item)}
+                  className="text-yellow-500 ml-2 text-xl hover:cursor-pointer"
+                  title="Remove bookmark"
+                >
+                  ★
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {!loading && Object.entries(feeds).map(([category, feedSources]) => (
+        {Object.entries(feeds).map(([category, feedSources]) => (
           <div key={category} className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
             <div className="bg-indigo-600 text-white px-4 py-2 text-lg font-semibold">
               {category}
             </div>
             <div className="p-4">
-              {feedSources.map((source: { source: string; items: { link: string; title: string; pubDate: string }[] }) => (
+              {feedSources.map((source) => (
                 <div key={source.source} className="mb-4">
                   <h3 className="text-indigo-500 font-bold mb-2">{source.source}</h3>
                   <ul className="space-y-2">
-                    {source.items.map((item: { link: string; title: string; pubDate: string }) => (
-                      <li key={item.title}>
-                        <a
-                          href={item.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-700 hover:text-indigo-600 transition duration-200"
+                    {source.items.map((item) => (
+                      <li key={item.link} className="flex justify-between items-start">
+                        <div>
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-gray-700 hover:text-indigo-600 transition duration-200"
+                          >
+                            {item.title}
+                          </a>
+                          <p className="text-xs text-gray-400">
+                            {new Date(item.pubDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => toggleBookmark(item)}
+                          className="text-yellow-500 ml-2 text-xl hover:cursor-pointer"
+                          title={isBookmarked(item.link) ? 'Remove bookmark' : 'Add to bookmarks'}
                         >
-                          {item.title}
-                        </a>
-                        <p className="text-xs text-gray-400">
-                          {new Date(item.pubDate).toLocaleDateString()}
-                        </p>
+                          {isBookmarked(item.link) ? '★' : '☆'}
+                        </button>
                       </li>
                     ))}
                   </ul>
@@ -118,6 +179,8 @@ const App = () => {
           </div>
         ))}
       </div>
+
+
 
       <footer className="text-center mt-12 text-sm text-gray-500">
         Made with ❤️ and React
