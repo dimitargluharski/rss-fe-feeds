@@ -17,6 +17,9 @@ const categorizedFeeds = {
     { name: 'FreeCodeCamp', url: import.meta.env.VITE_FREECODECAMP },
     { name: 'HackerNoon Frontend', url: import.meta.env.VITE_HACKERNOON_FRONTEND },
   ],
+  'AI & Web': [
+    { name: 'Towards AI', url: 'https://www.towardsai.net/feed' },
+  ]
 };
 
 type FeedItem = {
@@ -38,6 +41,8 @@ const App = () => {
   const [feeds, setFeeds] = useState<Feeds>({});
   const [loading, setLoading] = useState(true);
   const [bookmarks, setBookmarks] = useState<FeedItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   useEffect(() => {
     const fetchFeeds = async () => {
@@ -51,8 +56,12 @@ const App = () => {
               .then(res => res.json())
               .then(data => ({
                 source: source.name,
-                items: data.items.slice(0, 10),
+                items: Array.isArray(data.items) ? data.items.slice(0, 10) : [],
               }))
+              .catch(err => {
+                console.warn(`Failed to load feed for: ${source.name}`, err);
+                return { source: source.name, items: [] };
+              })
           );
 
           feedData[category] = await Promise.all(requests);
@@ -75,13 +84,9 @@ const App = () => {
 
   const toggleBookmark = (item: FeedItem) => {
     const isBookmarked = bookmarks.some(bookmark => bookmark.link === item.link);
-
-    let updatedBookmarks;
-    if (isBookmarked) {
-      updatedBookmarks = bookmarks.filter(bookmark => bookmark.link !== item.link);
-    } else {
-      updatedBookmarks = [...bookmarks, item];
-    }
+    const updatedBookmarks = isBookmarked
+      ? bookmarks.filter(bookmark => bookmark.link !== item.link)
+      : [...bookmarks, item];
 
     setBookmarks(updatedBookmarks);
     localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
@@ -90,6 +95,16 @@ const App = () => {
   const isBookmarked = (link: string) => {
     return bookmarks.some(bookmark => bookmark.link === link);
   };
+
+  const filteredBookmarks = bookmarks.filter((item) =>
+    item.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const sortedBookmarks = [...filteredBookmarks].sort((a, b) => {
+    const dateA = new Date(a.pubDate).getTime();
+    const dateB = new Date(b.pubDate).getTime();
+    return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+  });
 
   if (loading) {
     return (
@@ -107,9 +122,29 @@ const App = () => {
 
       {bookmarks.length > 0 && (
         <div className="max-w-4xl mx-auto mb-12 bg-white border border-yellow-300 shadow-lg rounded-xl p-6">
-          <h2 className="text-xl font-bold text-yellow-600 mb-4 ">⭐️ Bookmarked Articles</h2>
+          <h2 className="text-xl font-bold text-yellow-600 mb-4">⭐️ Bookmarked Articles</h2>
+
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <input
+              type="text"
+              placeholder="Search bookmarks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded w-full md:w-1/2"
+            />
+
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
+              className="px-2 py-1 border border-gray-300 rounded w-full md:w-1/4"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
+          </div>
+
           <ul className="space-y-3">
-            {bookmarks.map((item) => (
+            {sortedBookmarks.map((item) => (
               <li key={item.link} className="flex justify-between items-start">
                 <div>
                   <a
@@ -179,8 +214,6 @@ const App = () => {
           </div>
         ))}
       </div>
-
-
 
       <footer className="text-center mt-12 text-sm text-gray-500">
         Made with ❤️ and React
