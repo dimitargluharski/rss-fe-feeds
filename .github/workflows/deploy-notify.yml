@@ -8,8 +8,23 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Notify Discord
+      - name: Send Discord Embed
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
-          curl -X POST ${{ secrets.DISCORD_WEBHOOK }} \
-          -H "Content-Type: application/json" \
-          -d "{\"content\":\"📦 Кодът беше качен в GitHub! Vercel ще стартира билд. 🚀\"}"
+          TIMESTAMP=$(date +"%d.%m.%Y %H:%M:%S")
+          curl -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"username\": \"RSS Build Bot\",
+              \"embeds\": [{
+                \"title\": \"🚀 Кодът беше качен в GitHub!\",
+                \"description\": \"Vercel автоматично ще стартира билд за проекта **rss-fe-feeds**.\",
+                \"color\": 5814783,
+                \"fields\": [
+                  { \"name\": \"Дата\", \"value\": \"$TIMESTAMP\", \"inline\": true },
+                  { \"name\": \"Клон\", \"value\": \"main\", \"inline\": true }
+                ],
+                \"footer\": { \"text\": \"GitHub Actions + Vercel\" }
+              }]
+            }"
