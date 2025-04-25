@@ -69,8 +69,8 @@ const App = () => {
   }, []);
 
 
-  if(loading) {
-    return(
+  if (loading) {
+    return (
       <div className='text-center text-gray-600'>
         Loading feeds...
       </div>
@@ -92,28 +92,28 @@ const App = () => {
               {category}
             </div>
             <div className="p-4">
-                {feedSources.map((source: { source: string; items: { link: string; title: string; pubDate: string }[] }) => (
+              {feedSources.map((source: { source: string; items: { link: string; title: string; pubDate: string }[] }) => (
                 <div key={source.source} className="mb-4">
                   <h3 className="text-indigo-500 font-bold mb-2">{source.source}</h3>
                   <ul className="space-y-2">
-                  {source.items.map((item: { link: string; title: string; pubDate: string }) => (
-                    <li key={item.title}>
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-700 hover:text-indigo-600 transition duration-200"
-                    >
-                      {item.title}
-                    </a>
-                    <p className="text-xs text-gray-400">
-                      {new Date(item.pubDate).toLocaleDateString()}
-                    </p>
-                    </li>
-                  ))}
+                    {source.items.map((item: { link: string; title: string; pubDate: string }) => (
+                      <li key={item.title}>
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-700 hover:text-indigo-600 transition duration-200"
+                        >
+                          {item.title}
+                        </a>
+                        <p className="text-xs text-gray-400">
+                          {new Date(item.pubDate).toLocaleDateString()}
+                        </p>
+                      </li>
+                    ))}
                   </ul>
                 </div>
-                ))}
+              ))}
             </div>
           </div>
         ))}
