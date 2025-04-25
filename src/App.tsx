@@ -145,37 +145,41 @@ const App = () => {
 
           <ul className="space-y-3">
             {sortedBookmarks.map((item) => (
-              <li key={item.link} className="flex justify-between items-start">
-                <div>
-                  <a
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-700 hover:text-indigo-600 transition duration-200"
+              <li key={item.link} className="flex items-start gap-2">
+                <span className="text-lg text-gray-400 leading-6">•</span>
+                <div className="flex justify-between flex-1 items-start">
+                  <div>
+                    <a
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-700 hover:text-indigo-600 transition duration-200"
+                    >
+                      {item.title}
+                    </a>
+                    <p className="text-xs text-gray-400">
+                      {new Date(item.pubDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => toggleBookmark(item)}
+                    className="text-yellow-500 ml-2 text-xl hover:cursor-pointer"
+                    title={isBookmarked(item.link) ? 'Remove bookmark' : 'Add to bookmarks'}
                   >
-                    {item.title}
-                  </a>
-                  <p className="text-xs text-gray-400">
-                    {new Date(item.pubDate).toLocaleDateString()}
-                  </p>
+                    {isBookmarked(item.link) ? '★' : '☆'}
+                  </button>
                 </div>
-                <button
-                  onClick={() => toggleBookmark(item)}
-                  className="text-yellow-500 ml-2 text-xl hover:cursor-pointer"
-                  title="Remove bookmark"
-                >
-                  ★
-                </button>
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <div className="max-w-screen-xl mx-auto grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+
         {Object.entries(feeds).map(([category, feedSources]) => (
           <div key={category} className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-            <div className="bg-indigo-600 text-white px-4 py-2 text-lg font-semibold">
+            <div className="bg-indigo-600 text-white px-4 py-2 text-base md:text-sm font-semibold truncate">
               {category}
             </div>
             <div className="p-4">
@@ -184,27 +188,30 @@ const App = () => {
                   <h3 className="text-indigo-500 font-bold mb-2">{source.source}</h3>
                   <ul className="space-y-2">
                     {source.items.map((item) => (
-                      <li key={item.link} className="flex justify-between items-start">
-                        <div>
-                          <a
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-700 hover:text-indigo-600 transition duration-200"
+                      <li key={item.link} className="flex items-start gap-2">
+                        <span className="text-lg text-gray-400 leading-6">•</span>
+                        <div className="flex justify-between flex-1 items-start">
+                          <div>
+                            <a
+                              href={item.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-gray-700 hover:text-indigo-600 transition duration-200"
+                            >
+                              {item.title}
+                            </a>
+                            <p className="text-xs text-gray-400">
+                              {new Date(item.pubDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => toggleBookmark(item)}
+                            className="text-yellow-500 ml-2 text-xl hover:cursor-pointer"
+                            title={isBookmarked(item.link) ? 'Remove bookmark' : 'Add to bookmarks'}
                           >
-                            {item.title}
-                          </a>
-                          <p className="text-xs text-gray-400">
-                            {new Date(item.pubDate).toLocaleDateString()}
-                          </p>
+                            {isBookmarked(item.link) ? '★' : '☆'}
+                          </button>
                         </div>
-                        <button
-                          onClick={() => toggleBookmark(item)}
-                          className="text-yellow-500 ml-2 text-xl hover:cursor-pointer"
-                          title={isBookmarked(item.link) ? 'Remove bookmark' : 'Add to bookmarks'}
-                        >
-                          {isBookmarked(item.link) ? '★' : '☆'}
-                        </button>
                       </li>
                     ))}
                   </ul>
